@@ -23,7 +23,7 @@ BLOCK_SIZE = 20
 SPEED = 10
 
 pygame.init()
-font = pygame.font.Font('snake_game/arial.ttf', 25)
+font = pygame.font.Font('snake_game/assets/arial.ttf', 25)
 
 class Direction(Enum):
     RIGHT = 1
@@ -177,7 +177,7 @@ class SnakeGame:
         # Colisão com a bomba
         if self.head == self.bomb and self.has_bomb:
             # Pinta explosão a partir de uma imagem e adiciona um som
-            exp = pygame.image.load('snake_game/explosion.png')
+            exp = pygame.image.load('snake_game/assets/explosion.png')
             exp = pygame.transform.scale(exp, (3*BLOCK_SIZE, 3*BLOCK_SIZE))
             self.display.blit(exp, (self.bomb.x - BLOCK_SIZE, self.bomb.y - BLOCK_SIZE))
             pygame.display.flip()
@@ -192,7 +192,7 @@ class SnakeGame:
         """
 
         # Coloca uma imagem de fundo ajustada ao tamanho da tela
-        bg = pygame.image.load('snake_game/grass.png')
+        bg = pygame.image.load('snake_game/assets/grass.png')
         bg = pygame.transform.scale(bg, (self.display_width, self.display_height))
         self.display.blit(bg, (0, 0))
         
