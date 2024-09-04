@@ -14,6 +14,8 @@ SNAKE_COLOR_2 = (32, 33, 28)
 SNAKE_COLOR_3 = (250, 238, 10)
 STAR_COLOR_1 = (250, 238, 10)
 STAR_COLOR_2 = (255, 255, 142)
+BOMB_COLOR_1 = (0, 0, 0)
+BOMB_COLOR_2 = (33, 34, 38)
 BACKGROUND_COLOR = (0,0,0)
 FPS = 15
 
@@ -50,11 +52,14 @@ class SnakeGame:
                       Point(self.head.x-BLOCK_SIZE, self.head.y),
                       Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
         
-        self.count = 0
+        self.count_star = 0
+        self.count_bomb = 0
         self.score = 0
         self.food = None
         self.star = None
         self.has_star = False
+        self.bomb = None
+        self.has_bomb = False
         self._place_food()
         self._place_star()
 
@@ -82,15 +87,34 @@ class SnakeGame:
         if self.star in self.snake:
             self._place_star()
 
+    def _place_bomb(self):
+        """
+        Coloca a bomba em um ponto aleatório do jogo
+        """
+        x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
+        y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        self.bomb = Point(x, y)
+
+        # Se a bomba estiver em cima da cobra, coloca a bomba em outro lugar
+        if self.bomb in self.snake:
+            self._place_bomb()
+
     def play_step(self):
         """
         Função que roda a cada passo do jogo
         """
-        self.count += 1
-        if self.count >= FPS*10:
+        self.count_star += 1
+        self.count_bomb += 1
+
+        if self.count_star >= FPS*10:
             self.has_star = True
-            self.count = 0
+            self.count_star = 0
             self._place_star()
+        
+        if self.count_bomb >= FPS*12:
+            self.has_bomb = True
+            self.count_bomb = 0
+            self._place_bomb()
 
         # 1. Coletar a entrada do usuário
         for event in pygame.event.get():
@@ -150,6 +174,9 @@ class SnakeGame:
         # Colisão com a cobra
         if self.head in self.snake[1:]:
             return True
+        # Colisão com a bomba
+        if self.head == self.bomb and self.has_bomb:
+            return True
 
         return False
     
@@ -178,6 +205,11 @@ class SnakeGame:
         if self.has_star:
             pygame.draw.circle(self.display, STAR_COLOR_1, (self.star.x + BLOCK_SIZE//2, self.star.y + BLOCK_SIZE//2), BLOCK_SIZE//2)
             pygame.draw.circle(self.display, STAR_COLOR_2, (self.star.x + BLOCK_SIZE//2, self.star.y+ BLOCK_SIZE//2), BLOCK_SIZE//2 - 2)
+
+        # Pinta a bomba
+        if self.has_bomb:
+            pygame.draw.rect(self.display, BOMB_COLOR_1, pygame.Rect(self.bomb.x, self.bomb.y, BLOCK_SIZE, BLOCK_SIZE))
+            pygame.draw.rect(self.display, BOMB_COLOR_2, pygame.Rect(self.bomb.x + 3, self.bomb.y + 3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
 
         # Pinta a pontuação
         text = font.render("Score: " + str(self.score), True, SCORE_COLOR)
