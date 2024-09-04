@@ -6,11 +6,12 @@ from collections import namedtuple
 # HIPERPARÂMETROS
 
 SCORE_COLOR = (255, 255, 255)
-FRUIT_COLOR = (128, 13, 13)
+FRUIT_COLOR = (242, 92, 5)
 FRUIT_COLOR_2 = (2, 38, 1)
-FRUIT_COLOR_3 = (204, 0, 1)
-SNAKE_COLOR_1 = (67, 45, 89)
-SNAKE_COLOR_2 = (216, 222, 242)
+FRUIT_COLOR_3 = (242, 163, 65)
+SNAKE_COLOR_1 = (117, 17, 18)
+SNAKE_COLOR_2 = (32, 33, 28)
+SNAKE_COLOR_3 = (250, 238, 10)
 STAR_COLOR_1 = (250, 238, 10)
 STAR_COLOR_2 = (255, 255, 142)
 BACKGROUND_COLOR = (0,0,0)
@@ -165,7 +166,8 @@ class SnakeGame:
         # Pinta a cobra
         for pt in self.snake:
             pygame.draw.rect(self.display, SNAKE_COLOR_1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, SNAKE_COLOR_2, pygame.Rect(pt.x+4, pt.y+4, BLOCK_SIZE - 8, BLOCK_SIZE - 8))
+            pygame.draw.rect(self.display, SNAKE_COLOR_2, pygame.Rect(pt.x+3, pt.y+3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
+            pygame.draw.rect(self.display, SNAKE_COLOR_3, pygame.Rect(pt.x+6, pt.y+6, BLOCK_SIZE - 12, BLOCK_SIZE - 12))
         
         # Pinta a fruta
         pygame.draw.rect(self.display, FRUIT_COLOR, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
