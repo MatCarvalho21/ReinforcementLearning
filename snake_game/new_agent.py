@@ -3,21 +3,23 @@ import random
 import numpy as np
 from collections import deque
 from new_game import SnakeGameIA, Direction, Point
+from new_model import Linear_QNet, QTrainer
+from new_helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
-EXPLORATION_LIMIT = 80
+EXPLORATION_LIMIT = 200
 
 class Agent:
 
     def __init__(self):
         self.n_games = 0    
         self.epsilon = 0 # control the random
-        self.gamma = 0 # discount rate
+        self.gamma = 0.9 # discount rate [0,1]
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = None
-        self.trainer = None
+        self.model = Linear_QNet(19, 256, 3)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game): # game is a array of parameters 
         head = game.snake[0]
@@ -108,7 +110,7 @@ class Agent:
         # Caso contrário, vamos usar a rede neural para prever a melhor ação
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model.predict(state0)
+            prediction = self.model(state0)
             move = torch.argmax(prediction).item()
             final_move[move] = 1
 
@@ -122,6 +124,7 @@ def train():
     record = 0
     agent = Agent()
     game = SnakeGameIA()
+    game.reset()
 
     while True:
         # Pega o estado antigo
@@ -145,12 +148,15 @@ def train():
 
             if score > record:
                 record = score
-                # agent.model.save()
+                agent.model.save()
 
             print('Nº Jogos', agent.n_games, 'Score', score, 'Record:', record)
             
-            # TODO plot
-
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
+            plot(plot_scores, plot_mean_scores)
 
 if __name__ == '__main__':
     train()

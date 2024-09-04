@@ -47,6 +47,7 @@ class SnakeGameIA:
         pygame.display.set_caption('Snake Game')
         self.clock = pygame.time.Clock()
         self.clock.tick(FPS)
+        self.reset()
 
     def reset(self):
         """
@@ -63,9 +64,9 @@ class SnakeGameIA:
         self.count_bomb = 0
         self.score = 0
         self.food = None
-        self.star = None
+        self.star = Point(-BLOCK_SIZE, -BLOCK_SIZE)
         self.has_star = False
-        self.bomb = None
+        self.bomb = Point(-BLOCK_SIZE, -BLOCK_SIZE)
         self.has_bomb = False
         self._place_food()
         self._place_star()
