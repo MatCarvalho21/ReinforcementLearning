@@ -176,6 +176,12 @@ class SnakeGame:
             return True
         # Colisão com a bomba
         if self.head == self.bomb and self.has_bomb:
+            # Pinta explosão a partir de uma imagem e adiciona um som
+            exp = pygame.image.load('snake_game/explosion.png')
+            exp = pygame.transform.scale(exp, (3*BLOCK_SIZE, 3*BLOCK_SIZE))
+            self.display.blit(exp, (self.bomb.x - BLOCK_SIZE, self.bomb.y - BLOCK_SIZE))
+            pygame.display.flip()
+            pygame.time.delay(1000)
             return True
 
         return False
