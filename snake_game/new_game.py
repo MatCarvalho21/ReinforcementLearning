@@ -139,7 +139,7 @@ class SnakeGameIA:
         # 3. Verificar se o jogo acabou
         reward = 0
         game_over = False
-        if self._is_collision() or self.frame_iteration > 100*len(self.snake):
+        if self.is_collision() or self.frame_iteration > 100*len(self.snake):
             game_over = True
             reward = -10
             return reward, game_over, self.score
@@ -166,7 +166,7 @@ class SnakeGameIA:
         # 6. Retornar recompensa, se o jogo acabou e a pontuação
         return reward, game_over, self.score
     
-    def _is_collision(self, pt=None):
+    def is_collision(self, pt=None):
         """
         Checa se a cobra colidiu com a parede ou com ela mesma
         """
