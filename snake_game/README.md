@@ -41,7 +41,7 @@ O objetivo do jogo é controlar a cobra para comer a comida e crescer o máximo 
 ## Como Executar
 
 ```
-git clone https://github.com/seuusuario/snake_game_rl.git
+git clone https://github.com/MatCarvalho21/ReinforcementLearning.git
 pip install -r requirements.txt 
 python model/new_snake_game_human.py # para jogar
 python model/new_agent.py # para treinar
