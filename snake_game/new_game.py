@@ -140,9 +140,10 @@ class SnakeGameIA:
         # 3. Verificar se o jogo acabou
         reward = 0
         game_over = False
-        if self.is_collision() or self.frame_iteration > 10*len(self.snake):
+        if self.is_collision() or self.frame_iteration > 50*len(self.snake):
             game_over = True
             reward = -10
+            self.reset()
             return reward, game_over, self.score
         
         # 4. Colocar nova comida ou apenas mover
