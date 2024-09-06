@@ -54,20 +54,20 @@ class SnakeGameIA:
         Reseta o jogo, inicializando o estado do jogo.
         """
         # INICIALIZANDO INÍCIO DO JOGO
-        self.direction = Direction.RIGHT
-        self.head = Point(self.display_width/2, self.display_height/2)
-        self.snake = [self.head, 
-                      Point(self.head.x-BLOCK_SIZE, self.head.y),
-                      Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
+        self.enemy_direction = Direction.RIGHT
+        self.enemy_head = Point(self.display_width/2, self.display_height/2)
+        self.enemy_snake = [self.enemy_head, 
+                      Point(self.enemy_head.x-BLOCK_SIZE, self.enemy_head.y),
+                      Point(self.enemy_head.x-(2*BLOCK_SIZE), self.enemy_head.y)]
         
         self.count_star = 0
         self.count_bomb = 0
         self.score = 0
-        self.food = None
-        self.star = Point(-BLOCK_SIZE, -BLOCK_SIZE)
-        self.has_star = False
-        self.bomb = Point(-BLOCK_SIZE, -BLOCK_SIZE)
-        self.has_bomb = False
+        self.enemy_food = None
+        self.enemy_star = Point(-BLOCK_SIZE, -BLOCK_SIZE)
+        self.enemy_has_star = False
+        self.enemy_bomb = Point(-BLOCK_SIZE, -BLOCK_SIZE)
+        self.enemy_has_bomb = False
         self._place_food()
         self._place_star()
         self.frame_iteration = 0
@@ -78,10 +78,10 @@ class SnakeGameIA:
         """
         x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
         y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
-        self.food = Point(x, y)
+        self.enemy_food = Point(x, y)
 
         # Se a comida estiver em cima da cobra, coloca a comida em outro lugar
-        if self.food in self.snake:
+        if self.enemy_food in self.enemy_snake:
             self._place_food()
 
     def _place_star(self):
@@ -90,10 +90,10 @@ class SnakeGameIA:
         """
         x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
         y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
-        self.star = Point(x, y)
+        self.enemy_star = Point(x, y)
 
         # Se a estrela estiver em cima da cobra, coloca a estrela em outro lugar
-        if self.star in self.snake:
+        if self.enemy_star in self.enemy_snake:
             self._place_star()
 
     def _place_bomb(self):
@@ -102,10 +102,10 @@ class SnakeGameIA:
         """
         x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
         y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
-        self.bomb = Point(x, y)
+        self.enemy_bomb = Point(x, y)
 
         # Se a bomba estiver em cima da cobra, coloca a bomba em outro lugar
-        if self.bomb in self.snake:
+        if self.enemy_bomb in self.enemy_snake:
             self._place_bomb()
 
     def play_step(self, action):
@@ -117,12 +117,12 @@ class SnakeGameIA:
         self.count_bomb += 1
 
         if self.count_star >= FPS*10:
-            self.has_star = True
+            self.enemy_has_star = True
             self.count_star = 0
             self._place_star()
         
         if self.count_bomb >= FPS*12:
-            self.has_bomb = True
+            self.enemy_has_bomb = True
             self.count_bomb = 0
             self._place_bomb()
 
@@ -135,30 +135,30 @@ class SnakeGameIA:
 
         # 2. Movimentar a cobra
         self._move(action) 
-        self.snake.insert(0, self.head)
+        self.enemy_snake.insert(0, self.enemy_head)
 
         # 3. Verificar se o jogo acabou
         reward = 0
         game_over = False
-        if self.is_collision() or self.frame_iteration > 50*len(self.snake):
+        if self.enemy_is_collision() or self.frame_iteration > 50*len(self.enemy_snake):
             game_over = True
             reward = -10
             return reward, game_over, self.score
         
         # 4. Colocar nova comida ou apenas mover
-        if self.head == self.food:
+        if self.enemy_head == self.enemy_food:
             self.score += 1
             reward = 10
             self._place_food()
         else:
-            self.snake.pop()
+            self.enemy_snake.pop()
 
-        if self.head == self.star and self.has_star:
+        if self.enemy_head == self.enemy_star and self.enemy_has_star:
             self.score += 5
             reward = 50
-            self.has_star = False
+            self.enemy_has_star = False
             for _ in range(5):
-                self.snake.insert(0, self.head)
+                self.enemy_snake.insert(0, self.enemy_head)
 
         # 5. Atualizar a interface e o relógio
         self._update_ui()
@@ -167,24 +167,24 @@ class SnakeGameIA:
         # 6. Retornar recompensa, se o jogo acabou e a pontuação
         return reward, game_over, self.score
     
-    def is_collision(self, pt=None):
+    def enemy_is_collision(self, pt=None):
         """
         Checa se a cobra colidiu com a parede ou com ela mesma
         """
         if pt is None:
-            pt = self.head
+            pt = self.enemy_head
         # Colisão com a parede
         if pt.x > self.display_width - BLOCK_SIZE or pt.x < 0 or pt.y > self.display_height - BLOCK_SIZE or pt.y < 0:
             return True
         # Colisão com a cobra
-        if pt in self.snake[1:]:
+        if pt in self.enemy_snake[1:]:
             return True
         # Colisão com a bomba
-        if pt == self.bomb and self.has_bomb:
+        if pt == self.enemy_bomb and self.enemy_has_bomb:
             # Pinta explosão a partir de uma imagem e adiciona um som
             exp = pygame.image.load('snake_game/assets/explosion.png')
             exp = pygame.transform.scale(exp, (3*BLOCK_SIZE, 3*BLOCK_SIZE))
-            self.display.blit(exp, (self.bomb.x - BLOCK_SIZE, self.bomb.y - BLOCK_SIZE))
+            self.display.blit(exp, (self.enemy_bomb.x - BLOCK_SIZE, self.enemy_bomb.y - BLOCK_SIZE))
             pygame.display.flip()
             pygame.time.delay(1000)
             return True
@@ -202,25 +202,25 @@ class SnakeGameIA:
         self.display.blit(bg, (0, 0))
         
         # Pinta a cobra
-        for pt in self.snake:
+        for pt in self.enemy_snake:
             pygame.draw.rect(self.display, SNAKE_COLOR_1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
             pygame.draw.rect(self.display, SNAKE_COLOR_2, pygame.Rect(pt.x+3, pt.y+3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
             pygame.draw.rect(self.display, SNAKE_COLOR_3, pygame.Rect(pt.x+6, pt.y+6, BLOCK_SIZE - 12, BLOCK_SIZE - 12))
         
         # Pinta a fruta
-        pygame.draw.rect(self.display, FRUIT_COLOR, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
-        pygame.draw.rect(self.display, FRUIT_COLOR_2, pygame.Rect(self.food.x + BLOCK_SIZE/2 - 2, self.food.y - 4, 4, 4))
-        pygame.draw.rect(self.display, FRUIT_COLOR_3, pygame.Rect(self.food.x + 3, self.food.y + 3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
+        pygame.draw.rect(self.display, FRUIT_COLOR, pygame.Rect(self.enemy_food.x, self.enemy_food.y, BLOCK_SIZE, BLOCK_SIZE))
+        pygame.draw.rect(self.display, FRUIT_COLOR_2, pygame.Rect(self.enemy_food.x + BLOCK_SIZE/2 - 2, self.enemy_food.y - 4, 4, 4))
+        pygame.draw.rect(self.display, FRUIT_COLOR_3, pygame.Rect(self.enemy_food.x + 3, self.enemy_food.y + 3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
 
         # Pinta a estrela
-        if self.has_star:
-            pygame.draw.circle(self.display, STAR_COLOR_1, (self.star.x + BLOCK_SIZE//2, self.star.y + BLOCK_SIZE//2), BLOCK_SIZE//2)
-            pygame.draw.circle(self.display, STAR_COLOR_2, (self.star.x + BLOCK_SIZE//2, self.star.y+ BLOCK_SIZE//2), BLOCK_SIZE//2 - 2)
+        if self.enemy_has_star:
+            pygame.draw.circle(self.display, STAR_COLOR_1, (self.enemy_star.x + BLOCK_SIZE//2, self.enemy_star.y + BLOCK_SIZE//2), BLOCK_SIZE//2)
+            pygame.draw.circle(self.display, STAR_COLOR_2, (self.enemy_star.x + BLOCK_SIZE//2, self.enemy_star.y+ BLOCK_SIZE//2), BLOCK_SIZE//2 - 2)
 
         # Pinta a bomba
-        if self.has_bomb:
-            pygame.draw.rect(self.display, BOMB_COLOR_1, pygame.Rect(self.bomb.x, self.bomb.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BOMB_COLOR_2, pygame.Rect(self.bomb.x + 3, self.bomb.y + 3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
+        if self.enemy_has_bomb:
+            pygame.draw.rect(self.display, BOMB_COLOR_1, pygame.Rect(self.enemy_bomb.x, self.enemy_bomb.y, BLOCK_SIZE, BLOCK_SIZE))
+            pygame.draw.rect(self.display, BOMB_COLOR_2, pygame.Rect(self.enemy_bomb.x + 3, self.enemy_bomb.y + 3, BLOCK_SIZE - 6, BLOCK_SIZE - 6))
 
         # Pinta a pontuação
         text = font.render("Score: " + str(self.score), True, SCORE_COLOR)
@@ -233,7 +233,7 @@ class SnakeGameIA:
         """
 
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
-        idx = clock_wise.index(self.direction)
+        idx = clock_wise.index(self.enemy_direction)
 
         if np.array_equal(action, [1, 0, 0]):
             new_dir = clock_wise[idx] # no change
@@ -244,19 +244,19 @@ class SnakeGameIA:
             next_idx = (idx - 1) % 4
             new_dir = clock_wise[next_idx]
 
-        self.direction = new_dir
+        self.enemy_direction = new_dir
 
-        x = self.head.x
-        y = self.head.y
+        x = self.enemy_head.x
+        y = self.enemy_head.y
 
         # Movimentação da cobra
-        if self.direction == Direction.RIGHT:
+        if self.enemy_direction == Direction.RIGHT:
             x += BLOCK_SIZE
-        elif self.direction == Direction.LEFT:
+        elif self.enemy_direction == Direction.LEFT:
             x -= BLOCK_SIZE
-        elif self.direction == Direction.DOWN:
+        elif self.enemy_direction == Direction.DOWN:
             y += BLOCK_SIZE
-        elif self.direction == Direction.UP:
+        elif self.enemy_direction == Direction.UP:
             y -= BLOCK_SIZE
             
-        self.head = Point(x, y)
+        self.enemy_head = Point(x, y)

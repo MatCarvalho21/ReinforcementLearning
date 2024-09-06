@@ -25,35 +25,35 @@ class Agent:
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game): # game is a array of parameters 
-        head = game.snake[0]
+        head = game.enemy_snake[0]
         point_l = Point(head.x - 20, head.y)
         point_r = Point(head.x + 20, head.y)
         point_u = Point(head.x, head.y - 20)
         point_d = Point(head.x, head.y + 20)
         
-        dir_l = game.direction == Direction.LEFT
-        dir_r = game.direction == Direction.RIGHT
-        dir_u = game.direction == Direction.UP
-        dir_d = game.direction == Direction.DOWN
+        dir_l = game.enemy_direction == Direction.LEFT
+        dir_r = game.enemy_direction == Direction.RIGHT
+        dir_u = game.enemy_direction == Direction.UP
+        dir_d = game.enemy_direction == Direction.DOWN
 
         state = [
             # Danger straight (cobre a bomba)
-            (dir_r and game.is_collision(point_r)) or 
-            (dir_l and game.is_collision(point_l)) or 
-            (dir_u and game.is_collision(point_u)) or 
-            (dir_d and game.is_collision(point_d)),
+            (dir_r and game.enemy_is_collision(point_r)) or 
+            (dir_l and game.enemy_is_collision(point_l)) or 
+            (dir_u and game.enemy_is_collision(point_u)) or 
+            (dir_d and game.enemy_is_collision(point_d)),
 
             # Danger right (cobre a bomba)
-            (dir_u and game.is_collision(point_r)) or 
-            (dir_d and game.is_collision(point_l)) or 
-            (dir_l and game.is_collision(point_u)) or 
-            (dir_r and game.is_collision(point_d)),
+            (dir_u and game.enemy_is_collision(point_r)) or 
+            (dir_d and game.enemy_is_collision(point_l)) or 
+            (dir_l and game.enemy_is_collision(point_u)) or 
+            (dir_r and game.enemy_is_collision(point_d)),
 
             # Danger left (cobre a bomba)
-            (dir_d and game.is_collision(point_r)) or 
-            (dir_u and game.is_collision(point_l)) or 
-            (dir_r and game.is_collision(point_u)) or 
-            (dir_l and game.is_collision(point_d)),
+            (dir_d and game.enemy_is_collision(point_r)) or 
+            (dir_u and game.enemy_is_collision(point_l)) or 
+            (dir_r and game.enemy_is_collision(point_u)) or 
+            (dir_l and game.enemy_is_collision(point_d)),
             
             # Move direction
             dir_l,
@@ -62,22 +62,22 @@ class Agent:
             dir_d,
             
             # Food location 
-            game.food.x < game.head.x,  # food left
-            game.food.x > game.head.x,  # food right
-            game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y,  # food down
+            game.enemy_food.x < game.enemy_head.x,  # food left
+            game.enemy_food.x > game.enemy_head.x,  # food right
+            game.enemy_food.y < game.enemy_head.y,  # food up
+            game.enemy_food.y > game.enemy_head.y,  # food down
 
             # Star Location
-            game.star.x < game.head.x and game.has_star,  # star left
-            game.star.x > game.head.x and game.has_star,  # star right
-            game.star.y < game.head.y and game.has_star,  # star up
-            game.star.y > game.head.y and game.has_star,  # star down
+            game.enemy_star.x < game.enemy_head.x and game.enemy_has_star,  # star left
+            game.enemy_star.x > game.enemy_head.x and game.enemy_has_star,  # star right
+            game.enemy_star.y < game.enemy_head.y and game.enemy_has_star,  # star up
+            game.enemy_star.y > game.enemy_head.y and game.enemy_has_star,  # star down
 
             # Bomb Location
-            game.bomb.x < game.head.x and game.has_bomb,  # bomb left
-            game.bomb.x > game.head.x and game.has_bomb,  # bomb right
-            game.bomb.y < game.head.y and game.has_bomb,  # bomb up
-            game.bomb.y > game.head.y and game.has_bomb # bomb down
+            game.enemy_bomb.x < game.enemy_head.x and game.enemy_has_bomb,  # bomb left
+            game.enemy_bomb.x > game.enemy_head.x and game.enemy_has_bomb,  # bomb right
+            game.enemy_bomb.y < game.enemy_head.y and game.enemy_has_bomb,  # bomb up
+            game.enemy_bomb.y > game.enemy_head.y and game.enemy_has_bomb # bomb down
             ]
 
         return np.array(state, dtype=int) 
