@@ -5,6 +5,7 @@ from collections import deque
 from new_game import SnakeGameIA, Direction, Point
 from new_model import Linear_QNet, QTrainer
 from new_helper import plot
+import os
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -120,9 +121,17 @@ def train():
 
     plot_scores = []
     plot_mean_scores = []
+    plot_move_mean = []
     total_score = 0
     record = 0
     agent = Agent()
+
+    try:
+        agent.model.load()
+    except:
+        print("Não foi possível carregar o modelo")
+        pass
+
     game = SnakeGameIA()
     game.reset()
 
@@ -149,14 +158,16 @@ def train():
             if score > record:
                 record = score
                 agent.model.save()
-
-            print('Nº Jogos:', agent.n_games, '- Score:', score, '- Record:', record)
             
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores)
+            plot_move_mean.append(sum(plot_scores[-20:])/20)
+            plot(plot_scores, plot_mean_scores, plot_move_mean)
+
+            print('Nº Jogos:', agent.n_games, '- Score:', score, '- Record:', record, end=" ")
+            print("- Média Móvel (20):", sum(plot_scores[-20:])/20)
 
 if __name__ == '__main__':
     train()
