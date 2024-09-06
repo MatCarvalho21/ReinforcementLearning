@@ -1,5 +1,5 @@
-from new_agent import Agent
-from new_game import SnakeGameIA
+from agent import Agent
+from AI_game import SnakeGameIA
 
 def test():
     agent = Agent()

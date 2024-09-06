@@ -2,9 +2,9 @@ import torch
 import random 
 import numpy as np
 from collections import deque
-from new_game import SnakeGameIA, Direction, Point
-from new_model import Linear_QNet, QTrainer
-from new_helper import plot
+from AI_game import SnakeGameIA, Direction, Point
+from model import Linear_QNet, QTrainer
+from helper import plot
 import os
 
 MAX_MEMORY = 100_000
