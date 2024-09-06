@@ -150,13 +150,12 @@ def train():
                 record = score
                 agent.model.save()
 
+            print('Nº Jogos:', agent.n_games, '- Score:', score, '- Record:', record)
+            
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-
-            print('Nº Jogos:', agent.n_games, '- Score:', score, '- Record:', record, '- Média Móvel (20):', sum(plot_scores[-20:])/20)
-            
             plot(plot_scores, plot_mean_scores)
 
 if __name__ == '__main__':

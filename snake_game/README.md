@@ -36,7 +36,7 @@ Abaixo está a descrição dos principais arquivos e diretórios do projeto:
 
 O objetivo do jogo é controlar a cobra para comer a comida e crescer o máximo possível, evitando colidir com as bordas ou com o próprio corpo. O jogo é renderizado usando imagens e fontes incluídas na pasta `assets`. O agente, implementado com uma rede neural, aprende a jogar por tentativa e erro, usando um modelo de aprendizado por reforço.
 
-![game](assets/image.png)
+![game](assets/image_1.png)
 
 ## Como Executar
 
