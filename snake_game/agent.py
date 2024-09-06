@@ -11,7 +11,7 @@ MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
 EXPLORATION_LIMIT = 50
-HISTORICAL_RECORD = 49
+HISTORICAL_RECORD = 36
 MOVEMENT_MEAN = 20
 
 class Agent:
@@ -160,8 +160,8 @@ def train():
 
             if score > record:
                 record = score
-            if record > HISTORICAL_RECORD:
-                agent.model.save()
+
+            agent.model.save()
             
             plot_scores.append(score)
             total_score += score

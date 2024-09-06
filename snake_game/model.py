@@ -26,13 +26,13 @@ class Linear_QNet(nn.Module):
     def load(self, file_name="model.pth"):
         model_folder_path = "./snake_game/model"
         file_name = os.path.join(model_folder_path, file_name)
-        self.load_state_dict(torch.load(file_name))
+        self.load_state_dict(torch.load(file_name, weights_only=True))
 
     def _load(self, file_name="model.pth"):
         try:
             model_folder_path = "./snake_game/model"
             file_name = os.path.join(model_folder_path, file_name)
-            self.load_state_dict(torch.load(file_name))
+            self.load_state_dict(torch.load(file_name, weights_only=True))
             self.eval()
         except Exception as e:
             print(f"Erro ao carregar o modelo: {e}")

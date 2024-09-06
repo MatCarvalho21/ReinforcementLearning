@@ -76,8 +76,8 @@ class SnakeGameIA:
         """
         Coloca a comida em um ponto aleatório do jogo.
         """
-        x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
-        y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        x = random.randint(1, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE - 1)*BLOCK_SIZE 
+        y = random.randint(1, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE -1)*BLOCK_SIZE
         self.enemy_food = Point(x, y)
 
         # Se a comida estiver em cima da cobra, coloca a comida em outro lugar
@@ -88,8 +88,8 @@ class SnakeGameIA:
         """
         Coloca a estrela em um ponto aleatório do jogo.
         """
-        x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
-        y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        x = random.randint(1, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE - 1)*BLOCK_SIZE 
+        y = random.randint(1, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE -1)*BLOCK_SIZE
         self.enemy_star = Point(x, y)
 
         # Se a estrela estiver em cima da cobra, coloca a estrela em outro lugar
@@ -100,8 +100,8 @@ class SnakeGameIA:
         """
         Coloca a bomba em um ponto aleatório do jogo.
         """
-        x = random.randint(0, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
-        y = random.randint(0, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        x = random.randint(1, (self.display_width-BLOCK_SIZE )//BLOCK_SIZE - 1)*BLOCK_SIZE 
+        y = random.randint(1, (self.display_height-BLOCK_SIZE )//BLOCK_SIZE -1)*BLOCK_SIZE
         self.enemy_bomb = Point(x, y)
 
         # Se a bomba estiver em cima da cobra, coloca a bomba em outro lugar
@@ -174,7 +174,7 @@ class SnakeGameIA:
         if pt is None:
             pt = self.enemy_head
         # Colisão com a parede
-        if pt.x > self.display_width - BLOCK_SIZE or pt.x < 0 or pt.y > self.display_height - BLOCK_SIZE or pt.y < 0:
+        if pt.x > self.display_width - BLOCK_SIZE - 20 or pt.x < 20 or pt.y > self.display_height - BLOCK_SIZE - 20 or pt.y < 20:
             return True
         # Colisão com a cobra
         if pt in self.enemy_snake[1:]:
@@ -184,7 +184,7 @@ class SnakeGameIA:
             # Pinta explosão a partir de uma imagem e adiciona um som
             exp = pygame.image.load('snake_game/assets/explosion.png')
             exp = pygame.transform.scale(exp, (3*BLOCK_SIZE, 3*BLOCK_SIZE))
-            self.display.blit(exp, (self.enemy_bomb.x - BLOCK_SIZE, self.enemy_bomb.y - BLOCK_SIZE))
+            self.display.blit(exp, (self.enemy_bomb.x - BLOCK_SIZE, self.enemy_bomb.y - BLOCK_SIZE)) 
             pygame.display.flip()
             pygame.time.delay(1000)
             return True

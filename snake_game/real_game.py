@@ -202,6 +202,8 @@ class RealSnakeGame:
         # 3. Movimentar a cobra inimiga
         state_old = self.agent.get_state(self)
         action = self.agent.get_action(state_old)
+        print(state_old)
+        print(action)
         self._enemy_move(action)
         self.enemy_snake.insert(0, self.enemy_head)
 
