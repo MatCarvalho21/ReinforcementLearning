@@ -10,7 +10,9 @@ import os
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
-EXPLORATION_LIMIT = 200
+EXPLORATION_LIMIT = 50
+HISTORICAL_RECORD = 0
+MOVEMENT_MEAN = 20
 
 class Agent:
 
@@ -158,17 +160,18 @@ def train():
 
             if score > record:
                 record = score
+            if record > HISTORICAL_RECORD:
                 agent.model.save()
             
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plot_move_mean.append(sum(plot_scores[-20:])/20)
+            plot_move_mean.append(sum(plot_scores[-MOVEMENT_MEAN:])/MOVEMENT_MEAN)
             plot(plot_scores, plot_mean_scores, plot_move_mean)
 
             print('Nº Jogos:', agent.n_games, '- Score:', score, '- Record:', record, end=" ")
-            print("- Média Móvel (20):", sum(plot_scores[-20:])/20)
+            print("- Média Móvel (20):", sum(plot_scores[-MOVEMENT_MEAN:])/MOVEMENT_MEAN)
 
 if __name__ == '__main__':
     train()

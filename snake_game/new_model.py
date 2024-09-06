@@ -28,6 +28,16 @@ class Linear_QNet(nn.Module):
         file_name = os.path.join(model_folder_path, file_name)
         self.load_state_dict(torch.load(file_name))
 
+    def _load(self, file_name="model.pth"):
+        try:
+            model_folder_path = "./snake_game/model"
+            file_name = os.path.join(model_folder_path, file_name)
+            self.load_state_dict(torch.load(file_name))
+            self.eval()  # Coloque o modelo em modo de avaliação
+            print("Modelo carregado com sucesso.")
+        except Exception as e:
+            print(f"Erro ao carregar o modelo: {e}")
+
 class QTrainer:
     def __init__(self, model, lr, gamma):
         self.lr = lr
