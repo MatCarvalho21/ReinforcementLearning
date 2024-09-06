@@ -11,7 +11,7 @@ MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
 EXPLORATION_LIMIT = 50
-HISTORICAL_RECORD = 0
+HISTORICAL_RECORD = 10
 MOVEMENT_MEAN = 20
 
 class Agent:
@@ -129,10 +129,10 @@ def train():
     agent = Agent()
 
     try:
-        agent.model.load()
-        print("Modelo carregado com sucesso")
+        agent.model._load()
+        print("Modelo carregado com sucesso.")
     except:
-        print("Não foi possível carregar o modelo")
+        print("Não foi possível carregar o modelo.")
         pass
 
     game = SnakeGameIA()

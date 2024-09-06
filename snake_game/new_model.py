@@ -33,8 +33,7 @@ class Linear_QNet(nn.Module):
             model_folder_path = "./snake_game/model"
             file_name = os.path.join(model_folder_path, file_name)
             self.load_state_dict(torch.load(file_name))
-            self.eval()  # Coloque o modelo em modo de avaliação
-            print("Modelo carregado com sucesso.")
+            self.eval()
         except Exception as e:
             print(f"Erro ao carregar o modelo: {e}")
 
