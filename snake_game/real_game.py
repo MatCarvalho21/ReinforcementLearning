@@ -65,9 +65,9 @@ class RealSnakeGame:
                       Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
         
         self.enemy_food = None
-        self.enemy_star = None
+        self.enemy_star = Point(-BLOCK_SIZE, -BLOCK_SIZE)
         self.enemy_has_star = False
-        self.enemy_bomb = None
+        self.enemy_bomb = Point(-BLOCK_SIZE, -BLOCK_SIZE)
         self.enemy_has_bomb = False
         self._place_enemy_food()
         self.enemy_score = 0
@@ -78,9 +78,9 @@ class RealSnakeGame:
         self.count_bomb = 0
         self.score = 0
         self.food = None
-        self.star = None
+        self.star = Point(-BLOCK_SIZE, -BLOCK_SIZE)
         self.has_star = False
-        self.bomb = None
+        self.bomb = Point(-BLOCK_SIZE, -BLOCK_SIZE)
         self.has_bomb = False
         self._place_players_food()
 
