@@ -128,6 +128,7 @@ def train():
 
     try:
         agent.model.load()
+        print("Modelo carregado com sucesso")
     except:
         print("Não foi possível carregar o modelo")
         pass
