@@ -12,11 +12,13 @@ P1_COR_1 = (161, 23, 43)
 P1_COR_2 = (184, 54, 76)
 BACKGROUND = (255, 255, 255)
 RADIUS = 20
+MOVE_COLOR_1 = (217, 187, 41)
+MOVE_COLOR_2 = (95, 50, 140)
 
 class CheckersGame:
     def __init__(self, w=640, h=480):
         """
-        
+        Método de inicialização da classe CheckersGame
         """
 
         self.display_width = w
@@ -30,25 +32,26 @@ class CheckersGame:
         self.shift = 2
 
         self.board = np.array([[1, 0, 1, 0, 1, 0, 1, 0],
-                            [0, 1, 0, 1, 0, 1, 0, 1],
-                            [1, 0, 1, 0, 1, 0, 1, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 2, 0, 2, 0, 2, 0, 2],
-                            [2, 0, 2, 0, 2, 0, 2, 0],
-                            [0, 2, 0, 2, 0, 2, 0, 2]])
+                                [0, 1, 0, 1, 0, 1, 0, 1],
+                                [1, 0, 1, 0, 1, 0, 1, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 2, 0, 2, 0, 2, 0, 2],
+                                [2, 0, 2, 0, 2, 0, 2, 0],
+                                [0, 2, 0, 2, 0, 2, 0, 2]])
         
-        self.selected_piece = None  # Para armazenar a peça selecionada
-        self.valid_moves = []  # Para armazenar os movimentos válidos
+        self.selected_piece = None  
+        self.valid_moves = []  
         
     def game_loop(self):
         """
-        
+        Método principal do jogo
         """
+
         running = True
         while running:
             for event in pygame.event.get():
-                # Sair do jogo
+                
                 if event.type == pygame.QUIT:
                     running = False
 
@@ -56,55 +59,44 @@ class CheckersGame:
                     mouse_pos = pygame.mouse.get_pos()
                     self._move(mouse_pos)
                    
-            # Limpar a tela a cada frame
             self.display.fill(BACKGROUND)
-
-            # Atualizar peças
             self._draw_board()
             self._draw_pieces()
-
-            # Atualizar a tela
             pygame.display.update()
-
-            if self.p1_npieces == 0 or self.p2_npieces == 0:
-                running = False
-                if self.p1_npieces == 0:
-                    print("Player 2 ganhou!")
-                else:
-                    print("Player 1 ganhou!")
 
         pygame.quit()
 
     def _move(self, mouse_pos):
         """
-        Manipula o movimento da peça selecionada e destaca possíveis movimentos
+        Método para mover as peças no tabuleiro
         """
-        real_pos = (mouse_pos[1] - 40) // 50, (mouse_pos[0] - 120) // 50  # Coordenadas da peça clicada
+        real_pos = (mouse_pos[1] - 40) // 50, (mouse_pos[0] - 120) // 50  # Coordenadas da peça clicada (Y, X)
 
-        if self.selected_piece:  # Se já há uma peça selecionada
-            piece = self.board[self.selected_piece[0]][self.selected_piece[1]]  # Obter a peça selecionada
+        # verifica se uma peça foi selecionada e acessa ela  
+        if self.selected_piece:  
+            piece = self.board[self.selected_piece[0]][self.selected_piece[1]]  
 
-            if real_pos in self.valid_moves:  # Verifica se o clique foi em um movimento válido
-                # Atualiza o tabuleiro com o novo movimento
-                self.board[self.selected_piece[0]][self.selected_piece[1]] = 0  # Remove peça da posição antiga
-                self.board[real_pos[0]][real_pos[1]] = piece  # Coloca a peça na nova posição
+            # verifica se o clique foi um movimento válido e atualiza o tabuleiro
+            if real_pos in self.valid_moves:
+                self.board[self.selected_piece[0]][self.selected_piece[1]] = 0 
+                self.board[real_pos[0]][real_pos[1]] = piece
 
-                # Verificar se houve captura (comer peça)
+                # Verificar se houve captura (comer peça) e remover a peça capturada
                 middle_x = (self.selected_piece[0] + real_pos[0]) // 2
                 middle_y = (self.selected_piece[1] + real_pos[1]) // 2
-                if abs(self.selected_piece[0] - real_pos[0]) == 2:  # Diferença de 2 indica salto (captura)
-                    self.board[middle_x][middle_y] = 0  # Remove a peça comida
+                if abs(self.selected_piece[0] - real_pos[0]) == 2: 
+                    self.board[middle_x][middle_y] = 0  
 
                 # Verificar se a peça comum atingiu o lado oposto e deve ser promovida a dama
                 if piece == 1 and real_pos[0] == 7:
-                    self.board[real_pos[0]][real_pos[1]] = 3  # Jogador 1 virou dama
+                    self.board[real_pos[0]][real_pos[1]] = 3 
                 elif piece == 2 and real_pos[0] == 0:
-                    self.board[real_pos[0]][real_pos[1]] = 4  # Jogador 2 virou dama
+                    self.board[real_pos[0]][real_pos[1]] = 4 
 
                 # Verificar se pode capturar mais peças
                 if abs(self.selected_piece[0] - real_pos[0]) == 2:
                     self.valid_moves = self._get_valid_moves(real_pos, capturing=True)
-                    if self.valid_moves:  # Se pode capturar mais, continua com a mesma peça
+                    if self.valid_moves:
                         self.selected_piece = real_pos
                         return
 
@@ -119,25 +111,21 @@ class CheckersGame:
             else:
                 # Verifica se o jogador clicou em outra peça do mesmo time
                 new_piece = self.board[real_pos[0]][real_pos[1]]
-                if new_piece == self.shift or new_piece == self.shift + 2:  # Mesma cor ou dama
+
+                if new_piece == self.shift or new_piece == self.shift + 2:
                     # Redefinir para a nova peça selecionada
                     self.selected_piece = real_pos
-                    self.valid_moves = self._get_valid_moves(real_pos)  # Obtém novos movimentos válidos
-                else:
-                    # Se o clique foi fora dos movimentos válidos ou em outra peça inimiga, não faça nada
-                    print("Clique fora dos movimentos válidos ou em peça inimiga.")
+                    self.valid_moves = self._get_valid_moves(real_pos) 
 
         else:
             piece = self.board[real_pos[0]][real_pos[1]]  # Obter a peça clicada
             if piece == self.shift or piece == self.shift + 2:  # Verifica se é o turno da peça clicada (inclui damas)
-                self.selected_piece = real_pos  # Armazena a peça selecionada
-                self.valid_moves = self._get_valid_moves(real_pos)  # Obtém movimentos válidos
-            else:
-                print("Clique inválido: Não é sua vez ou a peça selecionada não pode ser movida.")
+                self.selected_piece = real_pos  
+                self.valid_moves = self._get_valid_moves(real_pos) 
 
     def _check_winner(self):
         """
-        Verifica se algum jogador não possui mais peças e declara o vencedor.
+        Métotodo para verificar se algum jogador ganhou
         """
         p1_pieces = np.count_nonzero((self.board == 1) | (self.board == 3))  # Jogador 1 (peças comuns e damas)
         p2_pieces = np.count_nonzero((self.board == 2) | (self.board == 4))  # Jogador 2 (peças comuns e damas)
@@ -152,14 +140,9 @@ class CheckersGame:
             pygame.quit()
             exit()
 
-
-
-
-
-
     def _draw_board(self):
         """
-        
+        Método para desenhar o tabuleiro
         """
 
         pygame.draw.rect(self.display, COR_BORDA, (110, 30, 420, 420))
@@ -172,12 +155,11 @@ class CheckersGame:
 
     def _get_valid_moves(self, pos, capturing=False):
         """
-        Retorna uma lista de movimentos válidos para a peça selecionada.
-        Se 'capturing' for True, só considera movimentos de captura.
+        Método para obter movimentos válidos
         """
         x, y = pos
         moves = []
-        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Direções diagonais (frente e trás)
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 
         piece = self.board[x][y]
 
@@ -202,7 +184,7 @@ class CheckersGame:
 
     def _draw_pieces(self):
         """
-        Desenha as peças e destaca possíveis movimentos
+        Método para desenhar as peças no tabuleiro
         """
 
         for each_x in range(0, 8):
@@ -231,9 +213,9 @@ class CheckersGame:
         # Destaque de movimentos válidos
         for move in self.valid_moves:
             if abs(self.selected_piece[0] - move[0]) == 2:  # Se for uma captura
-                pygame.draw.circle(self.display, (128, 0, 128), (move[1] * 50 + 145, move[0] * 50 + 65), RADIUS, 3)  # Círculo roxo
+                pygame.draw.circle(self.display, MOVE_COLOR_2, (move[1] * 50 + 145, move[0] * 50 + 65), RADIUS, 3)  # Círculo roxo
             else:
-                pygame.draw.circle(self.display, (255, 255, 0), (move[1] * 50 + 145, move[0] * 50 + 65), RADIUS, 3)  # Círculo amarelo
+                pygame.draw.circle(self.display, MOVE_COLOR_1, (move[1] * 50 + 145, move[0] * 50 + 65), RADIUS, 3)  # Círculo amarelo
 
 
 if __name__ == '__main__':
