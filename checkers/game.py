@@ -28,8 +28,6 @@ class CheckersGame:
         self.crown = pygame.image.load('checkers/assets/crown.png')
         self.crown = pygame.transform.scale(self.crown, (30, 30))
         self.shift = 2
-        self.p1_npieces = 12
-        self.p2_npieces = 12
 
         self.board = np.array([[1, 0, 1, 0, 1, 0, 1, 0],
                             [0, 1, 0, 1, 0, 1, 0, 1],
@@ -85,6 +83,7 @@ class CheckersGame:
 
         if self.selected_piece:  # Se já há uma peça selecionada
             piece = self.board[self.selected_piece[0]][self.selected_piece[1]]  # Obter a peça selecionada
+
             if real_pos in self.valid_moves:  # Verifica se o clique foi em um movimento válido
                 # Atualiza o tabuleiro com o novo movimento
                 self.board[self.selected_piece[0]][self.selected_piece[1]] = 0  # Remove peça da posição antiga
@@ -114,14 +113,47 @@ class CheckersGame:
                 self.selected_piece = None  # Desseleciona a peça
                 self.shift = 3 - self.shift  # Alterna turno
 
+                # Verificar se algum jogador ficou sem peças
+                self._check_winner()
+
             else:
-                self.selected_piece = None  # Se clicou fora dos movimentos válidos, desseleciona
+                # Verifica se o jogador clicou em outra peça do mesmo time
+                new_piece = self.board[real_pos[0]][real_pos[1]]
+                if new_piece == self.shift or new_piece == self.shift + 2:  # Mesma cor ou dama
+                    # Redefinir para a nova peça selecionada
+                    self.selected_piece = real_pos
+                    self.valid_moves = self._get_valid_moves(real_pos)  # Obtém novos movimentos válidos
+                else:
+                    # Se o clique foi fora dos movimentos válidos ou em outra peça inimiga, não faça nada
+                    print("Clique fora dos movimentos válidos ou em peça inimiga.")
 
         else:
             piece = self.board[real_pos[0]][real_pos[1]]  # Obter a peça clicada
             if piece == self.shift or piece == self.shift + 2:  # Verifica se é o turno da peça clicada (inclui damas)
                 self.selected_piece = real_pos  # Armazena a peça selecionada
                 self.valid_moves = self._get_valid_moves(real_pos)  # Obtém movimentos válidos
+            else:
+                print("Clique inválido: Não é sua vez ou a peça selecionada não pode ser movida.")
+
+    def _check_winner(self):
+        """
+        Verifica se algum jogador não possui mais peças e declara o vencedor.
+        """
+        p1_pieces = np.count_nonzero((self.board == 1) | (self.board == 3))  # Jogador 1 (peças comuns e damas)
+        p2_pieces = np.count_nonzero((self.board == 2) | (self.board == 4))  # Jogador 2 (peças comuns e damas)
+
+        if p1_pieces == 0:
+            print("Player 2 ganhou!")
+            pygame.quit()
+            exit()
+
+        elif p2_pieces == 0:
+            print("Player 1 ganhou!")
+            pygame.quit()
+            exit()
+
+
+
 
 
 
