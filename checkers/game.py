@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 
 # VARIÁVEIS GLOBAIS 
 FPS = 60
@@ -30,14 +31,17 @@ class CheckersGame:
         self.p1_npieces = 12
         self.p2_npieces = 12
 
-        self.board = [1, 0, 1, 0, 1, 0, 1, 0,
-                      0, 3, 0, 1, 0, 1, 0, 1,
-                      1, 0, 1, 0, 1, 0, 1, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 
-                      0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 2, 0, 2, 0, 2, 0, 2,
-                      2, 0, 4, 0, 2, 0, 2, 0,
-                      0, 2, 0, 2, 0, 2, 0, 2]
+        self.board = np.array([[1, 0, 1, 0, 1, 0, 1, 0],
+                            [0, 1, 0, 1, 0, 1, 0, 1],
+                            [1, 0, 1, 0, 1, 0, 1, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 2, 0, 2, 0, 2, 0, 2],
+                            [2, 0, 2, 0, 2, 0, 2, 0],
+                            [0, 2, 0, 2, 0, 2, 0, 2]])
+        
+        self.selected_piece = None  # Para armazenar a peça selecionada
+        self.valid_moves = []  # Para armazenar os movimentos válidos
         
     def game_loop(self):
         """
@@ -75,17 +79,51 @@ class CheckersGame:
 
     def _move(self, mouse_pos):
         """
-        
+        Manipula o movimento da peça selecionada e destaca possíveis movimentos
         """
+        real_pos = (mouse_pos[1] - 40) // 50, (mouse_pos[0] - 120) // 50  # Coordenadas da peça clicada
 
-        real_pos = (mouse_pos[1] - 40) // 50, (mouse_pos[0] - 120) // 50 # (X, Y)
-        piece = self.board[real_pos[0]*8 + real_pos[1]]
+        if self.selected_piece:  # Se já há uma peça selecionada
+            piece = self.board[self.selected_piece[0]][self.selected_piece[1]]  # Obter a peça selecionada
+            if real_pos in self.valid_moves:  # Verifica se o clique foi em um movimento válido
+                # Atualiza o tabuleiro com o novo movimento
+                self.board[self.selected_piece[0]][self.selected_piece[1]] = 0  # Remove peça da posição antiga
+                self.board[real_pos[0]][real_pos[1]] = piece  # Coloca a peça na nova posição
 
-        if piece == self.shift or piece == self.shift + 2:
-            print("OK")
+                # Verificar se houve captura (comer peça)
+                middle_x = (self.selected_piece[0] + real_pos[0]) // 2
+                middle_y = (self.selected_piece[1] + real_pos[1]) // 2
+                if abs(self.selected_piece[0] - real_pos[0]) == 2:  # Diferença de 2 indica salto (captura)
+                    self.board[middle_x][middle_y] = 0  # Remove a peça comida
+
+                # Verificar se a peça comum atingiu o lado oposto e deve ser promovida a dama
+                if piece == 1 and real_pos[0] == 7:
+                    self.board[real_pos[0]][real_pos[1]] = 3  # Jogador 1 virou dama
+                elif piece == 2 and real_pos[0] == 0:
+                    self.board[real_pos[0]][real_pos[1]] = 4  # Jogador 2 virou dama
+
+                # Verificar se pode capturar mais peças
+                if abs(self.selected_piece[0] - real_pos[0]) == 2:
+                    self.valid_moves = self._get_valid_moves(real_pos, capturing=True)
+                    if self.valid_moves:  # Se pode capturar mais, continua com a mesma peça
+                        self.selected_piece = real_pos
+                        return
+
+                # Alterna turno
+                self.valid_moves = []  # Limpa os movimentos válidos
+                self.selected_piece = None  # Desseleciona a peça
+                self.shift = 3 - self.shift  # Alterna turno
+
+            else:
+                self.selected_piece = None  # Se clicou fora dos movimentos válidos, desseleciona
 
         else:
-            print("NOT OK")
+            piece = self.board[real_pos[0]][real_pos[1]]  # Obter a peça clicada
+            if piece == self.shift or piece == self.shift + 2:  # Verifica se é o turno da peça clicada (inclui damas)
+                self.selected_piece = real_pos  # Armazena a peça selecionada
+                self.valid_moves = self._get_valid_moves(real_pos)  # Obtém movimentos válidos
+
+
 
     def _draw_board(self):
         """
@@ -100,36 +138,70 @@ class CheckersGame:
                 if (i+j) % 2 == 0:
                     pygame.draw.rect(self.display, COR_2, (120 + j*50, 40 + i*50, 50, 50))
 
+    def _get_valid_moves(self, pos, capturing=False):
+        """
+        Retorna uma lista de movimentos válidos para a peça selecionada.
+        Se 'capturing' for True, só considera movimentos de captura.
+        """
+        x, y = pos
+        moves = []
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Direções diagonais (frente e trás)
+
+        piece = self.board[x][y]
+
+        for dx, dy in directions:
+            # Se a peça for uma peça normal (não uma dama)
+            if piece == 1 and dx == -1 or piece == 2 and dx == 1:
+                continue  # Peças normais não podem andar para trás
+
+            nx, ny = x + dx, y + dy
+            # Verifica se a posição está dentro do tabuleiro
+            if 0 <= nx < 8 and 0 <= ny < 8:
+                if self.board[nx][ny] == 0 and not capturing:  # Movimentos normais (não captura)
+                    moves.append((nx, ny))
+
+                # Captura de peça
+                if 0 <= nx + dx < 8 and 0 <= ny + dy < 8 and self.board[nx][ny] == 3 - self.shift:
+                    # Verifica se há uma peça adversária e uma posição vazia depois dela
+                    if self.board[nx + dx][ny + dy] == 0:
+                        moves.append((nx + dx, ny + dy))
+
+        return moves
+
     def _draw_pieces(self):
         """
-        
+        Desenha as peças e destaca possíveis movimentos
         """
 
-        for each_pos in range(0, 64):
+        for each_x in range(0, 8):
+            for each_y in range(0, 8):
 
-            real_pos = (each_pos % 8, each_pos // 8)
+                real_pos = (each_x, each_y)
 
-            if self.board[each_pos] == 1:
+                if self.board[each_y][each_x] == 1:
+                    pygame.draw.circle(self.display, P1_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
+                    pygame.draw.circle(self.display, P1_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
 
-                pygame.draw.circle(self.display, P1_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
-                pygame.draw.circle(self.display, P1_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
+                elif self.board[each_y][each_x] == 2:
+                    pygame.draw.circle(self.display, P2_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
+                    pygame.draw.circle(self.display, P2_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
 
-            elif self.board[each_pos] == 2:
+                elif self.board[each_y][each_x] == 3:
+                    pygame.draw.circle(self.display, P1_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
+                    pygame.draw.circle(self.display, P1_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
+                    self.display.blit(self.crown, (real_pos[0]*50 + 130, real_pos[1]*50 + 49))
 
-                pygame.draw.circle(self.display, P2_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
-                pygame.draw.circle(self.display, P2_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
+                elif self.board[each_y][each_x] == 4:
+                    pygame.draw.circle(self.display, P2_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
+                    pygame.draw.circle(self.display, P2_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
+                    self.display.blit(self.crown, (real_pos[0]*50 + 130, real_pos[1]*50 + 49))
 
-            elif self.board[each_pos] == 3:
-
-                pygame.draw.circle(self.display, P1_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
-                pygame.draw.circle(self.display, P1_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
-                self.display.blit(self.crown, (real_pos[0]*50 + 130, real_pos[1]*50 + 49))
-
-            elif self.board[each_pos] == 4:
-
-                pygame.draw.circle(self.display, P2_COR_1, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS)
-                pygame.draw.circle(self.display, P2_COR_2, (real_pos[0]*50 + 145, real_pos[1]*50 + 65), RADIUS - 5)
-                self.display.blit(self.crown, (real_pos[0]*50 + 130, real_pos[1]*50 + 49))
+        # Destaque de movimentos válidos
+        for move in self.valid_moves:
+            if abs(self.selected_piece[0] - move[0]) == 2:  # Se for uma captura
+                pygame.draw.circle(self.display, (128, 0, 128), (move[1] * 50 + 145, move[0] * 50 + 65), RADIUS, 3)  # Círculo roxo
+            else:
+                pygame.draw.circle(self.display, (255, 255, 0), (move[1] * 50 + 145, move[0] * 50 + 65), RADIUS, 3)  # Círculo amarelo
 
 
 if __name__ == '__main__':
