@@ -39,7 +39,7 @@ class Judge:
         
         # Consulta ao modelo
         try:
-            response = self.model.run(input_text)
+            response = self.model.invoke(input_text)
             response = self.output_parser.parse(response)
             score = self._extract_score(response)
             return score
