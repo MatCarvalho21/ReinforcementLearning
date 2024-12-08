@@ -10,7 +10,7 @@ class Reviewer:
         )
         self.output_parser = StrOutputParser()
 
-    def evaluation(self, cleaned_data, used_code, score):
+    def evaluation(self, review_prompt:str, cleaned_data:str, used_code:str, score:int) -> str:
         """
         Avalia os dados limpos e o código utilizado, sugerindo melhorias com base no score.
 
@@ -20,6 +20,8 @@ class Reviewer:
         :return: Novo prompt sugerido pelo modelo.
         """
         prompt = f"""
+        {review_prompt}
+
         Dados originais: {cleaned_data}
         Código utilizado: {used_code}
         Pontuação de avaliação: {score}
@@ -31,7 +33,7 @@ class Reviewer:
         
         return self.output_parser.parse(response)
 
-    def make_report(self, report_prompt, prompt_1, score_1, prompt_2, score_2):
+    def make_report(self, report_prompt:str, prompt_1:str, score_1:int, code_1:str, prompt_2:str, score_2:int,  code_2:str) -> str:
         """
         Gera um relatório detalhado com base nos prompts e scores fornecidos.
 
@@ -43,15 +45,16 @@ class Reviewer:
         :return: Relatório gerado.
         """
         report = f"""
-        Relatório de Avaliação de Dados:
+        {report_prompt}
         
         Prompt 1: {prompt_1}
         Pontuação 1: {score_1}
+        Código 1: {code_1}
         
         Prompt 2: {prompt_2}
         Pontuação 2: {score_2}
-        
-        {report_prompt}
+        Código 2: {code_2}        
+
         """
         
         response = self.chat.run(report)

@@ -6,7 +6,7 @@ class Judge:
     Classe para avaliação de relatórios usando um LLM (Large Language Model) com base em um prompt pré-definido.
     """
 
-    def __init__(self, model_name:str="llama3.2:3b", prompt_file:str="judge_prompt.txt", temperature:float=0.8, max_tokens:int=256):
+    def __init__(self, prompt:str, model_name:str="llama3.2:3b", temperature:float=0.8, max_tokens:int=256):
         """
         Inicializa o Judge com um modelo LLM e um arquivo de prompt.
 
@@ -21,24 +21,8 @@ class Judge:
             temperature=temperature,
             max_tokens=max_tokens
         )
-        self.prompt_file = prompt_file
-        self.prompt = self._load_prompt()
+        self.prompt = prompt
         self.output_parser = StrOutputParser()
-
-    def _load_prompt(self) -> str:
-        """
-        Carrega o prompt do arquivo especificado.
-
-        Returns:
-            str: Conteúdo do prompt.
-        """
-        try:
-            with open(self.prompt_file, "r", encoding="utf-8") as file:
-                return file.read()
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Prompt file '{self.prompt_file}' not found.")
-        except Exception as e:
-            raise RuntimeError(f"An error occurred while loading the prompt: {e}")
 
     def evaluation(self, report: str) -> float:
         """
@@ -51,7 +35,7 @@ class Judge:
             float: Pontuação atribuída pelo LLM.
         """
         # Construção do input para o LLM
-        input_text = f"{self.prompt}\n\nRelatório a ser avaliado:\n{report}\n\nPor favor, forneça uma pontuação de 0 a 10:"
+        input_text = f"{self.prompt}\n\nRelatório a ser avaliado:\n{report}\n\nPor favor, seguindo os critérios fornecidos, dê uma pontuação para o relatório:"
         
         # Consulta ao modelo
         try:

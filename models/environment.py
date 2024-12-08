@@ -1,5 +1,7 @@
 import pandas as pd
+import numpy as np
 from rapidfuzz.distance import Levenshtein
+from models import Judge, Reviewer, Coder
 
 class Environment:
     """
@@ -10,17 +12,17 @@ class Environment:
     avaliação de pontuações por um juiz (judge) e revisão de códigos por um revisor (reviewer).
     """
 
-    def __init__(self):
+    def __init__(self, coder_1:Coder, coder_2:Coder, reviewer:Reviewer, judge:Judge, data_path:str):
         """
         Inicializa a classe Environment com atributos para os codificadores, revisor, juiz e dados originais.
         """
-        self.coder_1 = None
-        self.coder_2 = None
-        self.reviewer = None
-        self.judge = None
-        self.original_data = None
+        self.coder_1 = coder_1
+        self.coder_2 = coder_2
+        self.reviewer = reviewer
+        self.judge = judge
+        self.data_path = data_path
 
-    def generate_codes(self, data, prompt_coder_1, prompt_coder_2):
+    def generate_codes(self, data:pd.DataFrame, prompt_coder_1:str, prompt_coder_2:str) -> tuple[pd.DataFrame, str, pd.DataFrame, str]:
         """
         Gera códigos para dois codificadores baseados nos prompts fornecidos.
 
@@ -32,11 +34,13 @@ class Environment:
         Returns:
             tuple: Dados limpos e códigos gerados por cada codificador.
         """
-        cleaned_data_1, code_1 = self.coder_1.gen_code(data, prompt_coder_1)
-        cleaned_data_2, code_2 = self.coder_2.gen_code(data, prompt_coder_2)
+        cleaned_data_1, code_1 = self.coder_1.read_data(data, prompt_coder_1)
+
+        cleaned_data_2, code_2 = self.coder_2.improvement(data, prompt_coder_2, prompt_coder_1, code_1)
+
         return cleaned_data_1, code_1, cleaned_data_2, code_2
 
-    def calculate_score(self, cleaned_data):
+    def calculate_score(self, cleaned_data:pd.DataFrame) -> float:
         """
         Calcula a distância média de Levenshtein entre os nomes dos dados originais e dos dados limpos.
 
@@ -52,7 +56,7 @@ class Environment:
         ]
         return sum(distances) / len(distances)
 
-    def evaluate_and_update_prompt(self, cleaned_data, used_code, score):
+    def evaluate_and_update_prompt(self, review_prompt:str, cleaned_data:pd.DataFrame, used_code:str, score:float) -> str:
         """
         Gera um novo prompt com base na avaliação dos dados limpos, código utilizado e pontuação obtida.
 
@@ -64,10 +68,16 @@ class Environment:
         Returns:
             str: Novo prompt gerado pelo revisor.
         """
-        new_prompt = self.reviewer.evaluation(cleaned_data, used_code, score)
+        new_prompt = self.reviewer.evaluation(review_prompt, cleaned_data, used_code, score)
         return new_prompt
 
-    def train_codifiers(self, data, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations):
+    def train_codifiers(self,
+                        data_list:list[pd.DataFrame],
+                        prompt_1:str, prompt_2:str,
+                        reviewer_prompt:str,
+                        report_prompt:str,
+                        iterations:int
+                        ) -> tuple[str, tuple[list[float], list[float]]]:
         """
         Treina os codificadores através de várias iterações, ajustando seus prompts com base nas avaliações.
 
@@ -82,29 +92,48 @@ class Environment:
         Returns:
             tuple: Relatório gerado, histórico de perdas dos codificadores.
         """
-        score_loss_1 = []
-        score_loss_2 = []
+        score_loss_1 = list()
+        score_loss_2 = list()
+
+        best_prompt_1 = prompt_1
+        best_prompt_2 = prompt_2
+        best_score_1 = float("inf")
+        best_score_2 = float("inf")
+        best_code_1 = None
+        best_code_2 = None
+        previous = None
 
         for _ in range(iterations):
+            data = np.random.choice(data_list)
             cleaned_data_1, code_1, cleaned_data_2, code_2 = self.generate_codes(data, prompt_1, prompt_2)
 
             # Calcula pontuações para ambos os codificadores
             score_1 = self.calculate_score(cleaned_data_1)
             score_2 = self.calculate_score(cleaned_data_2)
 
+            if score_1 < best_score_1:
+                best_score_1 = score_1
+                best_prompt_1 = prompt_1
+                best_code_1 = code_1
+            
+            if score_2 < best_score_2:
+                best_score_2 = score_2
+                best_prompt_2 = prompt_2
+                best_code_2 = code_2
+
             # Atualiza os prompts com base nas avaliações
-            prompt_1 = self.evaluate_and_update_prompt(cleaned_data_1, code_1, score_1)
-            prompt_2 = self.evaluate_and_update_prompt(cleaned_data_2, code_2, score_2)
+            prompt_1 = self.evaluate_and_update_prompt(reviewer_prompt, cleaned_data_1, code_1, score_1)
+            prompt_2 = self.evaluate_and_update_prompt(reviewer_prompt, cleaned_data_2, code_2, score_2)
 
             # Registra as pontuações
             score_loss_1.append(score_1)
             score_loss_2.append(score_2)
 
         # Gera relatório final
-        report = self.reviewer.make_report(reviewer_prompt, prompt_1, score_1, code_1, prompt_2, score_2, code_2)
+        report = self.reviewer.make_report(report_prompt, best_prompt_1, best_score_1, best_code_1, best_prompt_2, best_score_2, best_code_2)
         return report, (score_loss_1, score_loss_2)
 
-    def train(self, data, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations, report_iterations):
+    def train(self, data_list:list[pd.DataFrame], prompt_1:str, prompt_2:str, reviewer_prompt:str, report_prompt:str, iterations:int):
         """
         Treina os codificadores e avalia os relatórios gerados ao longo de múltiplos ciclos.
 
@@ -120,16 +149,10 @@ class Environment:
         Returns:
             tuple: Relatório final, histórico de perdas nos relatórios, histórico de perdas dos codificadores.
         """
-        report_loss = []
         final_report = None
         final_scores_coders = None
 
-        for _ in range(report_iterations):
-            report, scores = self.train_codifiers(data, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations)
-            report_score = self.judge.evaluation(report) 
-            report_loss.append(report_score)
+        report, scores = self.train_codifiers(data_list, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations)
+        report_score = self.judge.evaluation(report)
 
-            final_report = report
-            final_scores_coders = scores
-
-        return final_report, report_loss, final_scores_coders
+        return report, report_score, scores
