@@ -101,7 +101,7 @@ class Environment:
             score_loss_2.append(score_2)
 
         # Gera relatório final
-        report = self.reviewer.make_report(reviewer_prompt, prompt_1, score_1, prompt_2, score_2)
+        report = self.reviewer.make_report(reviewer_prompt, prompt_1, score_1, code_1, prompt_2, score_2, code_2)
         return report, (score_loss_1, score_loss_2)
 
     def train(self, data, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations, report_iterations):
