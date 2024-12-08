@@ -1,4 +1,4 @@
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from langchain_core.output_parsers import StrOutputParser
 
 class Judge:
@@ -16,7 +16,7 @@ class Judge:
             temperature (float): Temperatura para amostragem de tokens (padrão: 0.8).
             max_tokens (int): Número máximo de tokens a serem gerados (padrão: 256).
         """
-        self.model = Ollama(
+        self.model = OllamaLLM(
             model=model_name,
             temperature=temperature,
             max_tokens=max_tokens
