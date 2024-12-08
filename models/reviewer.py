@@ -29,7 +29,7 @@ class Reviewer:
         Com base nisso, sugira melhorias no código de limpeza e explique como a qualidade dos dados pode ser aprimorada.
         """
         
-        response = self.chat.run(prompt)
+        response = self.chat.invoke(prompt)
         
         return self.output_parser.parse(response)
 
