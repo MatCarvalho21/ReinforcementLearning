@@ -1,6 +1,6 @@
 import pandas as pd
 from pandasai import SmartDataframe
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 
 class Coder:
     def __init__(self, model_name:str="llama", temperature:float=0.8, max_tokens:int=256):
@@ -9,7 +9,7 @@ class Coder:
 
         :param model_name: Nome do modelo Ollama local (default: 'llama').
         """
-        self.llm = Ollama(
+        self.llm = OllamaLLM(
             model=model_name,
             temperature=temperature,
             max_tokens=max_tokens

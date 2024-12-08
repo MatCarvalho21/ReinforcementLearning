@@ -12,7 +12,7 @@ class Environment:
     avaliação de pontuações por um juiz (judge) e revisão de códigos por um revisor (reviewer).
     """
 
-    def __init__(self, coder_1:Coder, coder_2:Coder, reviewer:Reviewer, judge:Judge, data_path:str):
+    def __init__(self, coder_1:Coder, coder_2:Coder, reviewer:Reviewer, judge:Judge, data_list:list[pd.DataFrame], original_data:pd.DataFrame):
         """
         Inicializa a classe Environment com atributos para os codificadores, revisor, juiz e dados originais.
         """
@@ -20,7 +20,8 @@ class Environment:
         self.coder_2 = coder_2
         self.reviewer = reviewer
         self.judge = judge
-        self.data_path = data_path
+        self.data_list = data_list
+        self.original_data = original_data
 
     def generate_codes(self, data:pd.DataFrame, prompt_coder_1:str, prompt_coder_2:str) -> tuple[pd.DataFrame, str, pd.DataFrame, str]:
         """
@@ -72,7 +73,6 @@ class Environment:
         return new_prompt
 
     def train_codifiers(self,
-                        data_list:list[pd.DataFrame],
                         prompt_1:str, prompt_2:str,
                         reviewer_prompt:str,
                         report_prompt:str,
@@ -104,7 +104,7 @@ class Environment:
         previous = None
 
         for _ in range(iterations):
-            data = np.random.choice(data_list)
+            data = np.random.choice(self.data_list)
             cleaned_data_1, code_1, cleaned_data_2, code_2 = self.generate_codes(data, prompt_1, prompt_2)
 
             # Calcula pontuações para ambos os codificadores
@@ -133,7 +133,7 @@ class Environment:
         report = self.reviewer.make_report(report_prompt, best_prompt_1, best_score_1, best_code_1, best_prompt_2, best_score_2, best_code_2)
         return report, (score_loss_1, score_loss_2)
 
-    def train(self, data_list:list[pd.DataFrame], prompt_1:str, prompt_2:str, reviewer_prompt:str, report_prompt:str, iterations:int):
+    def train(self, prompt_1:str, prompt_2:str, reviewer_prompt:str, report_prompt:str, iterations:int):
         """
         Treina os codificadores e avalia os relatórios gerados ao longo de múltiplos ciclos.
 
@@ -152,7 +152,7 @@ class Environment:
         final_report = None
         final_scores_coders = None
 
-        report, scores = self.train_codifiers(data_list, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations)
+        report, scores = self.train_codifiers(self.data_list, prompt_1, prompt_2, reviewer_prompt, report_prompt, iterations)
         report_score = self.judge.evaluation(report)
 
         return report, report_score, scores

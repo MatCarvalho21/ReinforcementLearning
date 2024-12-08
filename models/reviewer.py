@@ -1,9 +1,9 @@
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from langchain_core.output_parsers import StrOutputParser
 
 class Reviewer:
     def __init__(self, model_name:str="llama", temperature:float=0.8, max_tokens:int=256):
-        self.chat = Ollama(
+        self.chat = OllamaLLM(
             model=model_name,
             temperature=temperature,
             max_tokens=max_tokens
