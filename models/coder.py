@@ -2,16 +2,20 @@ import pandas as pd
 from pandasai import SmartDataframe
 from langchain_community.llms import Ollama
 
-class Coders:
-    def __init__(self, model_name:str="llama"):
+class Coder:
+    def __init__(self, model_name:str="llama", temperature:float=0.8, max_tokens:int=256):
         """
         Inicializa o Coders com um modelo Ollama local.
 
         :param model_name: Nome do modelo Ollama local (default: 'llama').
         """
-        self.llm = Ollama(model=model_name)
+        self.llm = Ollama(
+            model=model_name,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
 
-    def read_data(self, data:pd.DataFrame, prompt:str):
+    def read_data(self, data:pd.DataFrame, prompt:str) -> tuple[pd.DataFrame, str]:
         """
         Processa os dados com base em um prompt.
 
@@ -24,9 +28,11 @@ class Coders:
         cleaned_data = smart_df.chat(prompt, dataframe_only=True)
         used_code = smart_df.last_code_generated
 
+        del smart_df
+
         return cleaned_data, used_code
 
-    def improvement(self, data:pd.DataFrame, improve_prompt:str, used_prompt:str, used_code:str):
+    def improvement(self, data:pd.DataFrame, improve_prompt:str, used_prompt:str, used_code:str) -> tuple[pd.DataFrame, str]:
         """
         Melhora os dados ou a análise com base em um novo prompt.
 
@@ -37,14 +43,16 @@ class Coders:
         :return: Uma tupla (cleaned_data, result_code).
         """
         combined_prompt = (
-            f"Based on the original prompt: '{used_prompt}'\n"
-            f"And the code used:\n{used_code}\n"
-            f"Now, perform the following improvement: {improve_prompt}"
+            f"Baseado em: '{used_prompt}'\n"
+            f"E no código usado:\n{used_code}\n"
+            f"Tente aplicar as seguintes melhoras ao código se necessário e executar novamente: {improve_prompt}"
         )
         
         smart_df = SmartDataframe(data, config={"llm": self.llm}, save_code=True)
 
         cleaned_data = smart_df.chat(combined_prompt, dataframe_only=True)
         result_code = smart_df.last_code_generated
+
+        del smart_df
 
         return cleaned_data, result_code

@@ -34,7 +34,7 @@ por um LLM codificador para executar essa tarefa e um score. Esse score é a dis
 tratados pelo LLM  e o golden (que são os nomes corretos).
 
 Seu trabalho é analisar o código e o resultado do codificador e gerar um novo prompt para que o codificador possa
-melhorar sua performance. Seja o mais claro e objetivo possível. 
+melhorar sua performance. Seja o mais claro e objetivo possível.
 """
 
 REPORT = """
