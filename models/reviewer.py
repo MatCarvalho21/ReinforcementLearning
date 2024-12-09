@@ -57,6 +57,6 @@ class Reviewer:
 
         """
         
-        response = self.chat.run(report)
+        response = self.chat.invoke(report)
         
         return self.output_parser.parse(response)

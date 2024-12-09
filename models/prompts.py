@@ -28,10 +28,9 @@ Ex.: ["Joåo Sllva", "Mar1a Olive1ra", "Karlos Santos"] -> ["João Silva", "Mari
 Não invente regras, apenas siga as instruções acima. Seja o mais claro e objetivo possível.
 """
 
-REVIEWR = """
+REVIEWER = """
 Você vai receber um dataframe pandas (que deveria passar por uma limpeza de dados na coluna "Name"), um código gerado
-por um LLM codificador para executar essa tarefa e um score. Esse score é a distância de Levenshtein média entre os nomes
-tratados pelo LLM  e o golden (que são os nomes corretos).
+por um LLM codificador para executar essa tarefa e um score. Esse score é qualidade do código feito pelo codificador.
 
 Seu trabalho é analisar o código e o resultado do codificador e gerar um novo prompt para que o codificador possa
 melhorar sua performance. Seja o mais claro e objetivo possível.
@@ -39,10 +38,10 @@ melhorar sua performance. Seja o mais claro e objetivo possível.
 
 REPORT = """
 Você vai receber os prompts de dois LLMs codificadores que tinham como trabalho fazer a limpeza da coluna "Name" de um
-dataframe pandas. Também vai receber a distância de Levenshtein média entre os nomes tratados por eles e os nomes corretos.
+dataframe pandas. Também vai receber a pontuação do código, que visava limpar os nomes.
 Por fim, vai receber o código que cada um dos codificadores gerou para fazer realizar a limpeza dos dados.
 
-Sua tarefa é avaliar os prompts e a distância de Levenshtein e produzir um relatório avaliando o trabalho dos codificadores.
+Sua tarefa é avaliar os prompts e a pontuação dos códigos e produzir um relatório avaliando o trabalho dos codificadores.
 Seja bem descritivo e objetivo.
 
 Abaixo estão as seções que devem ser abordadas no relatório:

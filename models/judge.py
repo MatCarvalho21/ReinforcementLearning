@@ -40,32 +40,8 @@ class Judge:
         # Consulta ao modelo
         try:
             response = self.model.invoke(input_text)
-            response = self.output_parser.parse(response)
-            score = self._extract_score(response)
+            score = self.output_parser.parse(response)
             return score
         except Exception as e:
             raise RuntimeError(f"An error occurred during evaluation: {e}")
-
-    def _extract_score(self, response: str) -> float:
-        """
-        Extrai a pontuação da resposta do modelo.
-
-        Args:
-            response (str): Resposta do LLM.
-
-        Returns:
-            float: Pontuação extraída.
-
-        Raises:
-            ValueError: Se a pontuação não puder ser extraída.
-        """
-        try:
-            # Busca pela pontuação na resposta (assume formato "Pontuação: X")
-            for line in response.split("\n"):
-                if "Pontuação:" in line:
-                    score = float(line.split(":")[1].strip())
-                    return score
-            raise ValueError("Pontuação não encontrada na resposta.")
-        except Exception as e:
-            raise ValueError(f"Erro ao extrair a pontuação da resposta: {e}")
 

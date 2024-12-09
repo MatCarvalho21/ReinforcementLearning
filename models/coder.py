@@ -23,9 +23,10 @@ class Coder:
         :param prompt: Pergunta ou instrução em linguagem natural.
         :return: Uma tupla (cleaned_data, used_code).
         """
-        smart_df = SmartDataframe(data, config={"llm": self.llm}, save_code=True)
+        smart_df = SmartDataframe(data, config={"llm": self.llm,
+                                                "custom_whitelisted_dependencies": ["re", "io"]})
 
-        cleaned_data = smart_df.chat(prompt, dataframe_only=True)
+        cleaned_data = smart_df.chat(prompt)
         used_code = smart_df.last_code_generated
 
         del smart_df
@@ -48,9 +49,10 @@ class Coder:
             f"Tente aplicar as seguintes melhoras ao código se necessário e executar novamente: {improve_prompt}"
         )
         
-        smart_df = SmartDataframe(data, config={"llm": self.llm}, save_code=True)
+        smart_df = SmartDataframe(data, config={"llm": self.llm,
+                                                "custom_whitelisted_dependencies": ["re", "io"]})
 
-        cleaned_data = smart_df.chat(combined_prompt, dataframe_only=True)
+        cleaned_data = smart_df.chat(combined_prompt)
         result_code = smart_df.last_code_generated
 
         del smart_df
