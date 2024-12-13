@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from rapidfuzz.distance import Levenshtein
-from models import Judge, Reviewer, Coder
+from trabalho import Judge, Reviewer, Coder
 
 class Environment:
     """

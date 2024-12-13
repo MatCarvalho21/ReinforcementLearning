@@ -31,6 +31,9 @@ Não invente regras, apenas siga as instruções acima. Seja o mais claro e obje
 REVIEWER = """
 Você vai receber um dataframe pandas (que deveria passar por uma limpeza de dados na coluna "Name"), um código gerado
 por um LLM codificador para executar essa tarefa e um score. Esse score é qualidade do código feito pelo codificador.
+Esse score é uma nota de 0 a 10, quanto maior, melhor a qualidade do código, sendo 10 a nota máxima. Quanto maior for
+a nota, menos sugesso você deve dar ao codificador. Caso a nota seja pequena, maior a quantidade de sugestões você deve
+dar ao agente.
 
 Seu trabalho é analisar o código e o resultado do codificador e gerar um novo prompt para que o codificador possa
 melhorar sua performance. Seja o mais claro e objetivo possível.
